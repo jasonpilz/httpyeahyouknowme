@@ -3,7 +3,7 @@
 # require your code you used for NightWriter
 # note that we are talking to it through a web interface instead of a command-line interface
 # hope you wrote it well enough to support that ;)
-require '/Users/patwey/code/night_writer/lib/night_write.rb'
+require_relative 'night_write.rb'
 # require a webserver named Sinatra
 require 'sinatra/base'
 
