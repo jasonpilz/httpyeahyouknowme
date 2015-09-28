@@ -15,19 +15,28 @@ class HttpYeahYouKnowMe
       client = @tcp_server.accept
       env_hash = {}
 
-      request = client.gets.split(' ')
-      env_hash['REQUEST_METHOD'] = request[0]
-      env_hash['PATH_INFO'] = request[1]
-      env_hash['rack.input'] = StringIO.new
-      env_hash['Content-Type'] = 'text/html'
-      protocol = request[2]
+      first_line = client.gets.split(' ')
+      env_hash['REQUEST_METHOD'] = first_line[0]
+      env_hash['PATH_INFO'] = first_line[1]
+      protocol = first_line[2]
+
+      loop do
+        next_line = client.gets
+        break if next_line == "\r\n"
+        env_hash[next_line.split(': ')[0]] = next_line.split(': ')[1].chomp
+      end
+
+      # binding.pry
+      # client.eof?
+      env_hash['rack.input'] = StringIO.new # (body? params?)
 
       # call app
       response = @app.call(env_hash)
-      # binding.pry
+
       code = response[0]
       headers = response[1]
       body = response[2][0]
+
       # write response
       headers['Content-Length'] = body.length unless body.nil?
       client.print("#{protocol} #{code}\r\n")
