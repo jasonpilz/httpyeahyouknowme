@@ -1,11 +1,5 @@
-# go to http://localhost:9292/to_braille
-
-# require your code you used for NightWriter
-# note that we are talking to it through a web interface instead of a command-line interface
-# hope you wrote it well enough to support that ;)
-require_relative 'night_write.rb'
-# require a webserver named Sinatra
 require 'sinatra/base'
+require_relative 'night_write.rb'
 
 class NightWriterServer < Sinatra::Base
   get '/to_braille' do
@@ -27,7 +21,7 @@ end
 use_my_server = true
 
 if use_my_server
-  require_relative 'http_yeah_you_know_me' # <-- probably right, but double check it
+  require_relative 'http_yeah_you_know_me'
   server = HttpYeahYouKnowMe.new(9292, NightWriterServer)
   at_exit { server.stop }
   server.start
