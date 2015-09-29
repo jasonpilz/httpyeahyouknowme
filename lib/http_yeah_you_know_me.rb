@@ -32,25 +32,29 @@ class HttpYeahYouKnowMe
     env_hash
   end
 
+  def response(env_hash, client)
+    response = @app.call(env_hash)
+
+    code = response[0]
+    headers = response[1]
+    body = response[2][0]
+
+    # write response
+    headers['CONTENT_LENGTH'] = body.length unless body.nil?
+    client.print("#{env_hash['HTTP_VERSION']} #{code}\r\n")
+    headers.each_pair { |k, v| client.print("#{k}: #{v}\r\n") }
+    client.print("\r\n")
+    client.print("#{body}\r\n")
+    client.close
+  end
+
   def start
     loop do
       # read request
       client = @tcp_server.accept
       env_hash = self.class.parse(client)
       # call app
-      response = @app.call(env_hash)
-
-      code = response[0]
-      headers = response[1]
-      body = response[2][0]
-
-      # write response
-      headers['CONTENT_LENGTH'] = body.length unless body.nil?
-      client.print("#{env_hash['HTTP_VERSION']} #{code}\r\n")
-      headers.each_pair { |k, v| client.print("#{k}: #{v}\r\n") }
-      client.print("\r\n")
-      client.print("#{body}\r\n")
-      client.close
+      response(env_hash, client)
     end
   end
 
